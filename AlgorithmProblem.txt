@@ -1,0 +1,188 @@
+1、埃拉托斯特尼筛法
+
+1）介绍：
+埃拉托斯特尼筛法,简称埃氏筛，也称素数筛。这是一种简单且历史悠久的筛法，用来找出一定范围内所有的素数。
+
+2）原理：从2开始，将每个素数的各个倍数标记成合数（素数的倍数不可能是素数）。并且这是一个差为此素数本身的等差数列。
+
+3）总结：筛法求一定范围内的素数效率很高。
+
+4）代码实现
+// 01.筛法求素数（用筛法快速判断某个数是否为素数）
+#include <iostream>
+#include <cstdio>
+using namespace std;
+const int maxn = 900000;
+int flag[maxn];
+void init()
+{
+    for (int i = 2; i <= maxn; i++)
+    {
+        if (!flag[i])
+        {
+            // j = i * i, 效率比j = 2 * i 要快，但是如果i很大的话，i*i可能超出int范围
+            for (int j = 2 * i; j <= maxn; j += i)
+            {
+                flag[j] = 1;
+            }
+        }
+    }
+}
+int main()
+{
+    init();
+    int nTest, n;
+    scanf("%d", &nTest);
+    while (nTest--)
+    {
+        scanf("%d", &n);
+        if (!flag[n])
+        {
+            printf("Yes\n");
+        }
+        else
+        {
+            printf("No\n");
+        }
+    }
+    return 0;
+}
+
+=============================
+2、栈、队列（中缀式变后缀式）
+这是一道关于栈和队列的综合应用题，题目信息如下：
+描述
+    人们的日常习惯是把算术表达式写成中缀式，但对于机器来说更“习惯于”后缀式，关于算术表达式的中缀式和后缀式的论述一般的数据结构书都有相关内容可供参看，这里不再赘述，现在你的任务是将中缀式变为后缀式。
+
+输入
+    第一行输入一个整数n，共有n组测试数据（n<10)。
+    每组测试数据只有一行，是一个长度不超过1000的字符串，表示这个运算式的中缀式，每个运算式都是以“=”结束。这个表达式里只包含+-*/与小括号这几种符号。其中小括号可以嵌套使用。数据保证输入的操作数中不会出现负数。
+    数据保证除数不会为0
+输出
+    每组都输出该组中缀式相应的后缀式，要求相邻的操作数操作符用空格隔开。
+样例输入
+
+    2
+    1.000+2/4=
+    ((1+2)*5+1)/4=
+
+样例输出
+
+    1.000 2 4 / + =
+    1 2 + 5 * 1 + 4 / =
+    
+    
+======================
+中缀变后缀，后缀也就是所谓的逆波兰式。
+解决该问题的主要思路和步骤：
+1.用栈stack<char> myStack保存操作符，队列queue<char> myQueue保存结果
+2.str[i]如果为数字或者'.'则直接入队。isdigit(str[i])可以用于判断是否为阿拉伯数字
+3.如果遇到'('则直接入栈myStack
+4.如果遇到')'，则需要将'('上所有的操作符出栈入队，并且最后需要将'('出栈
+5.遇到 +、-、*、/ 则需要进一步判断栈顶元素与该当前操作符的优先级
+    I.如果 priority (stack.top()) >= priority (str[i]), 出栈 （入队列）
+    II.否则，myStack.push(str[i]); // 当栈顶元素优先级小于前操作符时则str[i]直接入栈
+6.将栈myStack中除‘#’之外的所有元素入队
+
+1）判断当前操作符的优先级函数：=的优先级为1，+、-的优先级,2，*、/的优先级为3，其他为0（如'#'、'(' )
+int priority(char c)
+{
+    if (c == '=')
+    {
+        return 1;
+    }
+    else if (c == '+' || c == '-')
+    {
+        return 2;
+    }
+    else if (c == '*' || c == '/')
+    {
+        return 3;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+2）其余部分代码如下：
+void solution(string &str)
+{
+    stack<char> myStack; // 保存操作符
+    myStack.push('#');
+    queue<char> myQueue; // 保存结果
+    for (int i = 0; i < str.size(); i++)
+    {
+        if (str[i] >= '0' && str[i] <= '9' || str[i] == '.')
+        {
+            myQueue.push(str[i]); // 数字或者'.'则直接入队
+        }
+        else if (str[i] == '(')
+        {
+            myStack.push(str[i]); // '(' 直接入栈
+        }
+        else if (str[i] == ')')
+        { // 遇到 ')' 则操作符出栈入队
+            char c = myStack.top();
+            while (c != '(')
+            {
+                myQueue.push(c);
+                myQueue.push(' ');
+                myStack.pop();
+                c = myStack.top();
+            }
+            myStack.pop(); // '(' 出栈
+        }
+        else
+        { // 遇到 +、-、*、/ ，要考虑优先级问题
+            char c = myStack.top();
+            while (!myStack.empty() && priority(c) >= priority(str[i]))
+            {
+                myQueue.push(c);
+                myQueue.push(' ');
+                myStack.pop();
+                c = myStack.top();
+            }
+            myStack.push(str[i]); // 当栈顶元素优先级小于前操作符时则直接入栈
+        }
+        // 如果操作数的下一个字符是+、-、*、/、）时需要往队列中添加一个' '
+        if (isdigit(str[i]) && (str[i + 1] == '+' || str[i + 1] == '-' || str[i + 1] == '*' || str[i + 1] == '/' || str[i + 1] == '=' || str[i + 1] == ')'))
+        {
+            myQueue.push(' ');
+        }
+    }
+    while (!myStack.empty() && myStack.top() != '#')
+    {
+        myQueue.push(myStack.top());
+        myStack.pop();
+    }
+    while (!myQueue.empty())
+    {
+        cout << myQueue.front();
+        myQueue.pop();
+    }
+    cout << endl;
+}
+
+int main()
+{
+    int nTest;
+    string str;
+    cin >> nTest;
+    while (nTest--)
+    {
+        cin >> str;
+        solution(str);
+    }
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+

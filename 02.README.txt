@@ -1,0 +1,22 @@
+一、02Python爬虫Demo简介
+1、项目介绍
+背景：
+由于生活太过沉闷，需要某些东西来调剂。恰好电影有这功能，能丰富我们的生活，开拓我们的见识。当然，这指的是好的、优秀的电影，如果是垃圾烂片不仅浪费时间，还丝毫学不到任何东西。因此此项目的目的是抓取全世界最影迷们最认可的250部电影（IMDb Top250），并保存到MySQL中，便于日后分析（也可用作学习数据库的有效数据）。
+至于什么是IMDb，Wikipedia上有详细介绍。附上一个链接：https://zh.wikipedia.org/wiki/imdb
+
+2）项目环境：
+操作系统：Window10 LTSC 2019
+编辑器：Visual Studio Code（Version：1.37.1）
+Python库：requests请求库、BeautifulSoup4、lxml解析库、PyMySQL驱动库、以及Python内置的os、re、time、sys库等
+
+3）最终目的
+从IMDB网站上获取全世界排名最靠前的250电影，并保存到MySQL中。
+
+二、项目思路
+利用requests请求库、BeautifulSoup解析库等获取IMDb上的电影top250，然后利用PyMySQL驱动库把获取到的电影数据插入到MySQL中。
+步骤：
+1）创建两个类，分别是进度条ProgressBar类和电影爬虫MovieSpider类；
+2）ProgressBar类的主要作用是显示当前爬虫抓取电影数据的进度，给人一种直观的感受。插入数据到MySQL中时，其也起到了显示进度的作用。
+3）MovieSpider类有get_all_movie(self)方法，用于得到所有的电影数据，这里采用的是用列表list存储所有电影数据（movie_ls[]，用字典dict保存每部电影的信息info（movie_info {}），其中的具体信息有：排名、电影名称、年份、评分。
+4）top.save_to_MySQL(all_movies)方法将得到的电影数据列表存储到MySQL中，show_progress_bar(self, i)方法显示进度。
+5）爬取成功后登录数据库查看电影数据。
